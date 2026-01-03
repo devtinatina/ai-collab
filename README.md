@@ -1,6 +1,6 @@
 # AI Collab - Agile AI Collaboration Tool
 
-PM(OpenAI GPT-4)과 Developer(Claude)가 애자일 방식으로 협업하는 CLI 도구입니다.
+PM(OpenAI GPT-5.1 Codex Mini)과 Developer(Claude Sonnet 4)가 애자일 방식으로 협업하는 CLI 도구입니다.
 
 > 깐깐한 PM이 승인할 때까지 개발자가 계속 수정하는 방식으로 높은 품질의 결과물을 생성합니다.
 
@@ -40,17 +40,23 @@ export ANTHROPIC_API_KEY='your-anthropic-api-key'
 models:
   manager:
     provider: "openai"
-    model: "gpt-4o"
+    model: "gpt-5.1-codex-mini"  # Options: "gpt-5.1-codex-mini", "gpt-4o", "o1-mini"
     temperature: 0.3
   developer:
-    provider: "anthropic"
-    model: "claude-sonnet-4-20250514"
+    provider: "anthropic"  # Switch to "openai" if needed
+    model: "claude-sonnet-4-20250514"  # Options: "claude-opus-4-20250514", "claude-sonnet-4-20250514"
     temperature: 0.7
 
 workflow:
   max_iterations: 10
   output_dir: "./output"
 ```
+
+#### Switching Providers
+
+To switch the developer to OpenAI:
+1. Change `provider: "anthropic"` to `provider: "openai"`
+2. Change model to an OpenAI model (e.g., `"gpt-5.1-codex-mini"`, `"gpt-4o"`)
 
 ## Usage
 
@@ -79,7 +85,7 @@ python cli.py interactive
 from ai_collab import create_client, CollaborationWorkflow
 
 # Create clients
-manager = create_client(provider="openai", model="gpt-4o")
+manager = create_client(provider="openai", model="gpt-5.1-codex-mini")
 developer = create_client(provider="anthropic", model="claude-sonnet-4-20250514")
 
 # Create workflow
@@ -113,7 +119,7 @@ print(f"Output: {result.final_output}")
                            │
                            ▼
 ┌─────────────────────────────────────────────────────────┐
-│  PM/Manager (GPT-4)                                      │
+│  PM/Manager (GPT-5.1 Codex Mini)                         │
 │  - Strict code review                                    │
 │  - Checks requirements coverage                          │
 │  - Identifies bugs, security issues                      │

@@ -1,18 +1,27 @@
 # AI Collaboration Tool Configuration
 
 # API Keys (환경변수 사용 권장: OPENAI_API_KEY, ANTHROPIC_API_KEY)
+# IMPORTANT: Use environment variables instead of hardcoding keys here
 openai_api_key: ""
 anthropic_api_key: ""
 
 # Model Settings
+# To switch providers, change the "provider" field and uncomment the appropriate model line
 models:
   manager:
     provider: "openai"
-    model: "gpt-4o"
+    model: "gpt-5.1-codex-mini"
     temperature: 0.3
   developer:
+    # Current provider (switch between "openai" and "anthropic")
     provider: "anthropic"
-    model: "claude-sonnet-4-20250514"
+
+    # OpenAI models (when provider is "openai")
+    # model: "gpt-4o"  # Options: "gpt-4o", "gpt-4o-mini", "gpt-4-turbo"
+
+    # Anthropic models (when provider is "anthropic")
+    model: "claude-sonnet-4-20250514"  # Options: "claude-opus-4-20250514", "claude-sonnet-4-20250514", "claude-3-5-sonnet-20241022"
+
     temperature: 0.7
 
 # Workflow Settings
