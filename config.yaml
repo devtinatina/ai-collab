@@ -1,0 +1,32 @@
+# AI Collaboration Tool Configuration
+
+# API Keys (환경변수 사용 권장: OPENAI_API_KEY, ANTHROPIC_API_KEY)
+openai_api_key: ""
+anthropic_api_key: ""
+
+# Model Settings
+models:
+  manager:
+    provider: "openai"
+    model: "gpt-4o"
+    temperature: 0.3
+  developer:
+    provider: "anthropic"
+    model: "claude-sonnet-4-20250514"
+    temperature: 0.7
+
+# Workflow Settings
+workflow:
+  max_iterations: 10
+  approval_required: true
+  save_conversation: true
+  output_dir: "./output"
+
+# Role Personas
+roles:
+  manager:
+    name: "PM (Project Manager)"
+    style: "strict"
+  developer:
+    name: "Developer"
+    style: "collaborative"
