@@ -26,10 +26,25 @@ models:
 
 # Workflow Settings
 workflow:
+  # Basic settings
   max_iterations: 10
   approval_required: true
   save_conversation: true
   output_dir: "./output"
+
+  # Budget Mode: "economy", "balanced", or "quality"
+  # This sets preset values for cost control parameters
+  budget_mode: "balanced"
+
+  # Advanced Cost Control (optional - overrides budget_mode if set)
+  # Leave commented to use budget_mode presets
+  # max_tokens: 50000        # Maximum total tokens (economy: 30k, balanced: 50k, quality: 100k)
+  # max_cost: 2.0            # Maximum cost in USD (economy: $1, balanced: $2, quality: $5)
+  # checkpoint_interval: 5   # Ask user every N iterations (economy: 3, balanced: 5, quality: 7)
+
+  # Smart Termination
+  max_no_progress: 3         # Stop if no progress for N iterations
+  early_stop_similarity: 0.95  # Stop if submissions are 95%+ similar
 
 # Role Personas
 roles:

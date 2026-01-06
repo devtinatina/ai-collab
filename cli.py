@@ -53,6 +53,13 @@ def create_workflow(config: dict) -> CollaborationWorkflow:
         developer_client=developer_client,
         max_iterations=workflow_config.get("max_iterations", 10),
         output_dir=workflow_config.get("output_dir", "./output"),
+        # Advanced control parameters
+        max_tokens=workflow_config.get("max_tokens"),
+        max_cost=workflow_config.get("max_cost"),
+        checkpoint_interval=workflow_config.get("checkpoint_interval"),
+        max_no_progress=workflow_config.get("max_no_progress", 3),
+        early_stop_similarity=workflow_config.get("early_stop_similarity", 0.95),
+        budget_mode=workflow_config.get("budget_mode", "balanced"),
     )
 
 

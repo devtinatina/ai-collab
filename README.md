@@ -48,8 +48,21 @@ models:
     temperature: 0.7
 
 workflow:
+  # Basic settings
   max_iterations: 10
   output_dir: "./output"
+
+  # Budget Mode: "economy", "balanced", or "quality"
+  budget_mode: "balanced"
+
+  # Advanced Cost Control (optional)
+  # max_tokens: 50000
+  # max_cost: 2.0
+  # checkpoint_interval: 5
+
+  # Smart Termination
+  max_no_progress: 3
+  early_stop_similarity: 0.95
 ```
 
 #### Switching Providers
@@ -57,6 +70,118 @@ workflow:
 To switch the developer to OpenAI:
 1. Change `provider: "anthropic"` to `provider: "openai"`
 2. Change model to an OpenAI model (e.g., `"gpt-5.1-codex-mini"`, `"gpt-4o"`)
+
+## Advanced Features
+
+### 🎯 Budget Control
+
+AI Collab now includes comprehensive budget control features to prevent API cost overruns:
+
+#### Budget Modes
+
+Choose from three preset budget modes:
+
+| Mode | Max Iterations | Max Tokens | Max Cost | Checkpoint Interval |
+|------|---------------|------------|----------|-------------------|
+| **economy** | 5 | 30,000 | $1.00 | Every 3 iterations |
+| **balanced** | 10 | 50,000 | $2.00 | Every 5 iterations |
+| **quality** | 15 | 100,000 | $5.00 | Every 7 iterations |
+
+**Usage:**
+```yaml
+workflow:
+  budget_mode: "economy"  # or "balanced" or "quality"
+```
+
+Or via Python:
+```python
+workflow = CollaborationWorkflow(
+    manager_client=manager,
+    developer_client=developer,
+    budget_mode="economy"
+)
+```
+
+#### Custom Budget Limits
+
+Override budget mode with custom limits:
+
+```yaml
+workflow:
+  budget_mode: "balanced"  # Base preset
+  max_tokens: 40000        # Custom token limit
+  max_cost: 1.5            # Custom cost limit ($)
+  checkpoint_interval: 4    # Ask user every 4 iterations
+```
+
+**What happens when limits are exceeded:**
+- **max_tokens**: Workflow stops automatically, saves progress
+- **max_cost**: Workflow stops automatically, saves progress
+- **checkpoint_interval**: User is prompted to continue or stop
+
+### 🔄 Smart Early Termination
+
+Automatically detect and stop unproductive iterations:
+
+#### No Progress Detection
+
+Stops workflow if developer makes no meaningful progress for N consecutive iterations:
+
+```yaml
+workflow:
+  max_no_progress: 3  # Stop after 3 iterations with no progress
+```
+
+#### Similarity-Based Stopping
+
+Stops if consecutive submissions are too similar (developer is stuck):
+
+```yaml
+workflow:
+  early_stop_similarity: 0.95  # Stop if 95%+ similar
+```
+
+**Example:**
+```
+Iteration 1: Developer writes 500 lines of code
+Iteration 2: Developer makes minor changes (5 lines)
+Iteration 3: Developer makes minor changes (3 lines)
+→ Stopped: No meaningful progress for 3 iterations
+```
+
+### 📊 Real-Time Monitoring
+
+During execution, you'll see:
+
+```
+Budget: 12,450/50,000 tokens (24.9%) | $0.0374/$2.00 (1.9%)
+
+━━━ Checkpoint at iteration 5 ━━━
+Tokens used: 25,340 / 50,000
+Estimated cost: $0.0760 / $2.00
+
+Continue workflow? [Y/n]:
+```
+
+### 📈 Final Statistics
+
+After workflow completion:
+
+```
+Final Statistics:
+  Iterations: 7
+  Total tokens: 31,245
+  Estimated cost: $0.0937
+  Stop reason: approved
+```
+
+**Stop Reasons:**
+- `approved` - PM approved the work ✅
+- `max_iterations` - Reached iteration limit
+- `max_tokens` - Exceeded token budget
+- `max_cost` - Exceeded cost budget
+- `no_progress` - No meaningful progress detected
+- `user_stopped` - User stopped at checkpoint
 
 ## Usage
 
@@ -88,7 +213,7 @@ from ai_collab import create_client, CollaborationWorkflow
 manager = create_client(provider="openai", model="gpt-5.1-codex-mini")
 developer = create_client(provider="anthropic", model="claude-sonnet-4-20250514")
 
-# Create workflow
+# Basic workflow
 workflow = CollaborationWorkflow(
     manager_client=manager,
     developer_client=developer,
@@ -99,7 +224,43 @@ workflow = CollaborationWorkflow(
 result = workflow.run_development("Create a function to validate emails")
 print(f"Approved: {result.success}")
 print(f"Iterations: {result.iterations}")
+print(f"Total tokens: {result.total_tokens}")
+print(f"Cost: ${result.total_cost:.4f}")
+print(f"Stop reason: {result.stopped_reason}")
 print(f"Output: {result.final_output}")
+```
+
+#### Advanced Usage with Budget Control
+
+```python
+# Economy mode - fast and cheap
+workflow_economy = CollaborationWorkflow(
+    manager_client=manager,
+    developer_client=developer,
+    budget_mode="economy",
+)
+
+# Custom budget limits
+workflow_custom = CollaborationWorkflow(
+    manager_client=manager,
+    developer_client=developer,
+    budget_mode="balanced",      # Start with balanced preset
+    max_tokens=30000,            # But limit to 30k tokens
+    max_cost=1.0,                # And $1 max cost
+    checkpoint_interval=3,        # Ask user every 3 iterations
+    max_no_progress=2,           # Stop after 2 iterations with no progress
+    early_stop_similarity=0.90,  # Stop if 90%+ similar
+)
+
+result = workflow_custom.run_development("Build a REST API")
+
+# Check why it stopped
+if result.stopped_reason == "max_cost":
+    print("Stopped due to budget limit")
+elif result.stopped_reason == "no_progress":
+    print("Stopped due to lack of progress")
+elif result.stopped_reason == "approved":
+    print("Successfully completed!")
 ```
 
 ## How It Works
